@@ -3,6 +3,9 @@ package com.d9.bookmanager.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+@Entity
+@Table(name = "books")
+@Data
 public class Book {
     
     @Id
