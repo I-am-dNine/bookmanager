@@ -2,6 +2,9 @@ package com.d9.bookmanager.service;
 
 import com.d9.bookmanager.entity.Book;
 import com.d9.bookmanager.repository.BookRepository;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -39,6 +42,10 @@ public class BookService {
 
     public void deleteBook(Long id) {
         bookRepository.deleteById(id);
+    }
+
+    public Page<Book> searchBooks(String keyword, Pageable pageable) {
+        return bookRepository.findByTitleContainingIgnoreCaseOrAuthorContainingIgnoreCase(keyword, keyword, pageable);
     }
 
 }
