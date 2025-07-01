@@ -1,6 +1,9 @@
 package com.d9.bookmanager.controller;
 
 import com.d9.bookmanager.service.BookService;
+
+import jakarta.validation.Valid;
+
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,12 +34,12 @@ public class BookController {
     }
 
     @PostMapping
-    public Book createBook(@RequestBody Book book) {
+    public Book createBook(@RequestBody @Valid Book book) {
         return bookService.createBook(book);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Book> updateBook(@PathVariable Long id, @RequestBody Book book) {
+    public ResponseEntity<Book> updateBook(@PathVariable Long id, @RequestBody @Valid Book book) {
         return ResponseEntity.ok(bookService.updateBook(id, book));
     }
 
