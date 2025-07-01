@@ -1,7 +1,10 @@
 package com.d9.bookmanager.init;
 
 import com.d9.bookmanager.entity.Book;
+import com.d9.bookmanager.entity.Reader;
 import com.d9.bookmanager.repository.BookRepository;
+import com.d9.bookmanager.repository.ReaderRepository;
+
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -9,9 +12,11 @@ import org.springframework.stereotype.Component;
 public class DataInitializer implements CommandLineRunner {
 
     private final BookRepository bookRepository;
+    private final ReaderRepository readerRepository;
 
-    public DataInitializer(BookRepository bookRepository) {
+    public DataInitializer(BookRepository bookRepository, ReaderRepository readerRepository) {
         this.bookRepository = bookRepository;
+        this.readerRepository = readerRepository;
     }
 
     @Override
@@ -53,6 +58,25 @@ public class DataInitializer implements CommandLineRunner {
                     .build());
 
             System.out.println("📚 Sample books initialized.");
+        }
+
+        if (readerRepository.count() == 0) {
+                readerRepository.save(Reader.builder()
+                                .name("Alice Lin")
+                                .email("alice@example.com")
+                                .build());
+
+                readerRepository.save(Reader.builder()
+                                .name("Bob Chen")
+                                .email("bob@example.com")
+                                .build());
+
+                readerRepository.save(Reader.builder()
+                                .name("Cathy Wu")
+                                .email("cathy@example.com")
+                                .build());
+
+                System.out.println("👤 Sample readers initialized.");
         }
     }
 }
