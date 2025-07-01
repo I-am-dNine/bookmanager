@@ -1,11 +1,14 @@
 package com.d9.bookmanager.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 @Entity
 @Table(name = "books")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Book {
     
     @Id
