@@ -1,9 +1,14 @@
 package com.d9.bookmanager.init;
 
 import com.d9.bookmanager.entity.Book;
+import com.d9.bookmanager.entity.BorrowRecord;
 import com.d9.bookmanager.entity.Reader;
 import com.d9.bookmanager.repository.BookRepository;
+import com.d9.bookmanager.repository.BorrowRecordRepository;
 import com.d9.bookmanager.repository.ReaderRepository;
+
+import java.time.LocalDate;
+import java.util.List;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -11,16 +16,21 @@ import org.springframework.stereotype.Component;
 @Component
 public class DataInitializer implements CommandLineRunner {
 
-    private final BookRepository bookRepository;
-    private final ReaderRepository readerRepository;
+        private final BookRepository bookRepository;
+        private final ReaderRepository readerRepository;
+        private final BorrowRecordRepository borrowRecordRepository;
 
-    public DataInitializer(BookRepository bookRepository, ReaderRepository readerRepository) {
-        this.bookRepository = bookRepository;
-        this.readerRepository = readerRepository;
-    }
+        public DataInitializer(BookRepository bookRepository,
+                                ReaderRepository readerRepository,
+                                BorrowRecordRepository borrowRecordRepository) {
+                this.bookRepository = bookRepository;
+                this.readerRepository = readerRepository;
+                this.borrowRecordRepository = borrowRecordRepository;
+        }
 
     @Override
     public void run(String... args) {
+        // 初始化書籍
         if (bookRepository.count() == 0) {
             bookRepository.save(Book.builder()
                     .title("Effective Java")
@@ -60,6 +70,7 @@ public class DataInitializer implements CommandLineRunner {
             System.out.println("📚 Sample books initialized.");
         }
 
+        // 初始化借閱者
         if (readerRepository.count() == 0) {
                 readerRepository.save(Reader.builder()
                                 .name("Alice Lin")
@@ -77,6 +88,29 @@ public class DataInitializer implements CommandLineRunner {
                                 .build());
 
                 System.out.println("👤 Sample readers initialized.");
+        }
+
+        // 初始化借閱記錄
+        if (borrowRecordRepository.count() == 0) {
+                List<Book> books = bookRepository.findAll();
+                List<Reader> readers = readerRepository.findAll();
+    
+                borrowRecordRepository.saveAll(List.of(
+                    BorrowRecord.builder()
+                            .book(books.get(0))
+                            .reader(readers.get(0))
+                            .borrowDate(LocalDate.of(2025, 6, 1))
+                            .returnDate(null)
+                            .build(),
+                    BorrowRecord.builder()
+                            .book(books.get(1))
+                            .reader(readers.get(1))
+                            .borrowDate(LocalDate.of(2025, 6, 3))
+                            .returnDate(LocalDate.of(2025, 6, 10))
+                            .build()
+                ));
+    
+                System.out.println("📖 Sample borrow records initialized.");
         }
     }
 }
