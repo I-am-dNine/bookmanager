@@ -47,4 +47,14 @@ public class BorrowRecordService {
     public void deleteRecord(Long id) {
         borrowRecordRepository.deleteById(id);
     }
+
+    public List<BorrowRecord> getRecordsByReader(Long readerId) {
+        Reader reader = readerRepository.findById(readerId).orElseThrow(() -> new RuntimeException("找不到使用者"));
+        return borrowRecordRepository.findByReader(reader);
+    }
+    
+    public List<BorrowRecord> getRecordsByBook(Long bookId) {
+        Book book = bookRepository.findById(bookId).orElseThrow(() -> new RuntimeException("找不到書籍"));
+        return borrowRecordRepository.findByBook(book);
+    }
 }

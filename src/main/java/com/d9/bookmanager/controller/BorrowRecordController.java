@@ -32,4 +32,14 @@ public class BorrowRecordController {
         borrowRecordService.deleteRecord(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/by-reader/{readerId}")
+    public List<BorrowRecord> getByReader(@PathVariable Long readerId) {
+        return borrowRecordService.getRecordsByReader(readerId);
+    }
+
+    @GetMapping("/by-book/{bookId}")
+    public List<BorrowRecord> getByBook(@PathVariable Long bookId) {
+        return borrowRecordService.getRecordsByBook(bookId);
+    }
 }
