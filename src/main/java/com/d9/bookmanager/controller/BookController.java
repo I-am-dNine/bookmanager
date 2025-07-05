@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import java.util.List;
 
 import com.d9.bookmanager.dto.ApiResponse;
@@ -40,6 +42,7 @@ public class BookController {
                 .orElse(ResponseEntity.status(404).body(ApiResponse.error(404, "找不到該書籍")));
     }
 
+    @PreAuthorize("hasRole('ADMIN','STAFF')")
     @PostMapping
     @Operation(summary = "新增書籍", description = "建立一本新書，需提供書名、作者、ISBN、庫存數量")
     public ResponseEntity<ApiResponse<Book>> createBook(@RequestBody @Valid Book book) {
@@ -47,6 +50,7 @@ public class BookController {
         return ResponseEntity.ok(ApiResponse.success("書籍建立成功", created));
     }
 
+    @PreAuthorize("hasRole('ADMIN','STAFF')")
     @PutMapping("/{id}")
     @Operation(summary = "更新書籍", description = "根據 ID 修改書籍的基本資訊")
     public ResponseEntity<ApiResponse<Book>> updateBook(@PathVariable Long id, @RequestBody @Valid Book book) {
@@ -54,6 +58,7 @@ public class BookController {
         return ResponseEntity.ok(ApiResponse.success("書籍更新成功", updated));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     @Operation(summary = "刪除書籍", description = "根據 ID 刪除書籍紀錄")
     public ResponseEntity<ApiResponse<Void>> deleteBook(@PathVariable Long id) {

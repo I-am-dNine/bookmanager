@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -38,6 +39,7 @@ public class ReaderController {
                 .orElse(ResponseEntity.status(404).body(ApiResponse.error(404, "找不到該借閱者")));
     }
 
+    @PreAuthorize("hasRole('ADMIN','STAFF')")
     @PostMapping
     @Operation(summary = "新增借閱者", description = "新增一位新的使用者（姓名 + Email）")
     public ResponseEntity<ApiResponse<Reader>> createReader(@RequestBody @Valid Reader reader) {
@@ -45,6 +47,7 @@ public class ReaderController {
         return ResponseEntity.ok(ApiResponse.success("借閱者新增成功", created));
     }
 
+    @PreAuthorize("hasRole('ADMIN','STAFF')")
     @PutMapping("/{id}")
     @Operation(summary = "更新借閱者資訊", description = "根據 ID 更新借閱者資料")
     public ResponseEntity<ApiResponse<Reader>> updateReader(@PathVariable Long id, @RequestBody @Valid Reader reader) {
@@ -52,6 +55,7 @@ public class ReaderController {
         return ResponseEntity.ok(ApiResponse.success("借閱者資訊更新成功", updated));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     @Operation(summary = "刪除借閱者", description = "根據 ID 刪除借閱者紀錄")
     public ResponseEntity<ApiResponse<Void>> deleteReader(@PathVariable Long id) {
