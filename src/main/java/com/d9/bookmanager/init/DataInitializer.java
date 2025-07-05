@@ -3,12 +3,14 @@ package com.d9.bookmanager.init;
 import com.d9.bookmanager.entity.Book;
 import com.d9.bookmanager.entity.BorrowRecord;
 import com.d9.bookmanager.entity.Reader;
+import com.d9.bookmanager.model.Role;
 import com.d9.bookmanager.repository.BookRepository;
 import com.d9.bookmanager.repository.BorrowRecordRepository;
 import com.d9.bookmanager.repository.ReaderRepository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -75,16 +77,19 @@ public class DataInitializer implements CommandLineRunner {
                 readerRepository.save(Reader.builder()
                                 .name("Alice Lin")
                                 .email("alice@example.com")
+                                .roles(Set.of(Role.ADMIN))
                                 .build());
 
                 readerRepository.save(Reader.builder()
                                 .name("Bob Chen")
                                 .email("bob@example.com")
+                                .roles(Set.of(Role.STAFF))
                                 .build());
 
                 readerRepository.save(Reader.builder()
                                 .name("Cathy Wu")
                                 .email("cathy@example.com")
+                                .roles(Set.of(Role.USER))
                                 .build());
 
                 System.out.println("👤 Sample readers initialized.");
