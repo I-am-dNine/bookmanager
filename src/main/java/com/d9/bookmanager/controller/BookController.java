@@ -29,6 +29,7 @@ public class BookController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('admin','STAFF')")
     @Operation(summary = "查詢所有書籍", description = "取得系統中所有書籍的清單")
     public ApiResponse<List<Book>> getAllBooks() {
         return ApiResponse.success("書籍清單取得成功", bookService.getAllBooks());
