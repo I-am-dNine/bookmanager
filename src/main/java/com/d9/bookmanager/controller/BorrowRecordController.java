@@ -31,7 +31,7 @@ public class BorrowRecordController {
         return ApiResponse.success("查詢成功，共 " + records.size() + " 筆紀錄", records);
     }
 
-    @PreAuthorize("hasRole('ADMIN','STAFF')")
+    @PreAuthorize("hasAnyRole('ADMIN','STAFF')")
     @PostMapping
     @Operation(summary = "建立借閱紀錄", description = "指定書籍與使用者，建立新的借閱記錄")
     public ResponseEntity<ApiResponse<BorrowRecord>> create(@RequestParam Long bookId, @RequestParam Long readerId) {
@@ -39,7 +39,7 @@ public class BorrowRecordController {
         return ResponseEntity.ok(ApiResponse.success("借閱紀錄建立成功", record));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @DeleteMapping("/{id}")
     @Operation(summary = "刪除借閱紀錄", description = "根據借閱紀錄 ID 刪除該筆資料")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {

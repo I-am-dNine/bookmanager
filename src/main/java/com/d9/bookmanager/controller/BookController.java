@@ -18,7 +18,7 @@ import com.d9.bookmanager.dto.ApiResponse;
 import com.d9.bookmanager.entity.Book;
 
 @RestController
-@RequestMapping("/books")
+@RequestMapping("/api/books")
 @Tag(name = "Books", description = "書籍管理相關操作")
 public class BookController {
 
@@ -29,7 +29,7 @@ public class BookController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('admin','STAFF')")
+    @PreAuthorize("hasAnyRole('ADMIN','STAFF')")
     @Operation(summary = "查詢所有書籍", description = "取得系統中所有書籍的清單")
     public ApiResponse<List<Book>> getAllBooks() {
         return ApiResponse.success("書籍清單取得成功", bookService.getAllBooks());
@@ -43,7 +43,7 @@ public class BookController {
                 .orElse(ResponseEntity.status(404).body(ApiResponse.error(404, "找不到該書籍")));
     }
 
-    @PreAuthorize("hasRole('ADMIN','STAFF')")
+    @PreAuthorize("hasAnyRole('ADMIN','STAFF')")
     @PostMapping
     @Operation(summary = "新增書籍", description = "建立一本新書，需提供書名、作者、ISBN、庫存數量")
     public ResponseEntity<ApiResponse<Book>> createBook(@RequestBody @Valid Book book) {
@@ -51,7 +51,7 @@ public class BookController {
         return ResponseEntity.ok(ApiResponse.success("書籍建立成功", created));
     }
 
-    @PreAuthorize("hasRole('ADMIN','STAFF')")
+    @PreAuthorize("hasAnyRole('ADMIN','STAFF')")
     @PutMapping("/{id}")
     @Operation(summary = "更新書籍", description = "根據 ID 修改書籍的基本資訊")
     public ResponseEntity<ApiResponse<Book>> updateBook(@PathVariable Long id, @RequestBody @Valid Book book) {
@@ -59,7 +59,7 @@ public class BookController {
         return ResponseEntity.ok(ApiResponse.success("書籍更新成功", updated));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @DeleteMapping("/{id}")
     @Operation(summary = "刪除書籍", description = "根據 ID 刪除書籍紀錄")
     public ResponseEntity<ApiResponse<Void>> deleteBook(@PathVariable Long id) {
