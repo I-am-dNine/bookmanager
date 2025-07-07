@@ -13,6 +13,7 @@ spring:
       ddl-auto: update
     show-sql: true
     database-platform: org.hibernate.dialect.H2Dialect
-  jwt:
-    secret: mySuperSecretKeyForJWT
-    expirationMs: 3600000 # 1 小时
+  
+jwt:
+  secret: mySuperSecretKeyForJWT
+  expirationMs: 3600000 # 1 小时
