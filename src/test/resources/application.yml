@@ -1,0 +1,3 @@
+jwt:
+  secret: mySuperSecretKeyForJWT
+  expirationMs: 3600000 
