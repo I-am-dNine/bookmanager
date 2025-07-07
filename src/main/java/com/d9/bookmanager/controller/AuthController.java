@@ -1,31 +1,38 @@
 package com.d9.bookmanager.controller;
 
 import com.d9.bookmanager.dto.ApiResponse;
-import com.d9.bookmanager.dto.UserLoginRequest;
-import com.d9.bookmanager.util.JwtUtil;
-import org.springframework.security.authentication.*;
+import com.d9.bookmanager.dto.JwtResponse;
+import com.d9.bookmanager.dto.LoginRequest;
+import com.d9.bookmanager.security.JwtTokenUtil;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 public class AuthController {
 
-    private final AuthenticationManager authManager;
-    private final JwtUtil jwtUtil;
+    private final AuthenticationManager authenticationManager;
+    private final JwtTokenUtil jwtTokenUtil;
 
-    public AuthController(AuthenticationManager authManager, JwtUtil jwtUtil) {
-        this.authManager = authManager;
-        this.jwtUtil = jwtUtil;
+    public AuthController(AuthenticationManager authenticationManager, JwtTokenUtil jwtTokenUtil) {
+        this.authenticationManager = authenticationManager;
+        this.jwtTokenUtil = jwtTokenUtil;
     }
 
     @PostMapping("/login")
-    public ApiResponse<String> login(@RequestBody UserLoginRequest request) {
-        UsernamePasswordAuthenticationToken authInputToken =
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword());
+    public ResponseEntity<ApiResponse<JwtResponse>> login(@Valid @RequestBody LoginRequest loginRequest) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        loginRequest.getEmail(),
+                        loginRequest.getPassword()
+                )
+        );
 
-        authManager.authenticate(authInputToken); // 若帳密錯誤會拋例外
-
-        String token = jwtUtil.generateToken(request.getUsername());
-        return ApiResponse.success("登入成功", token);
+        String token = jwtTokenUtil.generateToken(authentication);
+        return ResponseEntity.ok(ApiResponse.success("登入成功", new JwtResponse(token)));
     }
 }
