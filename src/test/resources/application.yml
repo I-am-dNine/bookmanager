@@ -1,3 +1,3 @@
 jwt:
-  secret: mySuperSecretKeyForJWT
+  secret: w8Qw1QkQw2Qw3Qw4Qw5Qw6Qw7Qw8Qw9Qw0Qw1Qw2Qw3Qw4Qw5Qw6Qw7Qw8Qw9Qw0Qw1Qw2Qw3Qw4Qw5Qw6Qw7Qw8Qw9Qw0Q==
   expirationMs: 3600000 

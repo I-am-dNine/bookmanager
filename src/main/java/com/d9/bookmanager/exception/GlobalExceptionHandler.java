@@ -31,9 +31,10 @@ public class GlobalExceptionHandler {
     // 處理一般 Runtime 錯誤（可擴充其他類型）
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ApiResponse<String>> handleRuntimeException(RuntimeException ex) {
+        ex.printStackTrace();
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error(500, "伺服器發生錯誤：" + ex.getMessage()));
+                .body(ApiResponse.error(500, "服务器发生错误：" + ex.getMessage()));
     }
 
 }
