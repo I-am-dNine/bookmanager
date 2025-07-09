@@ -1,5 +1,7 @@
 package com.d9.bookmanager.config;
 
+import com.d9.bookmanager.security.JwtAccessDeniedHandler;
+import com.d9.bookmanager.security.JwtAuthenticationEntryPoint;
 import com.d9.bookmanager.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.*;
 import org.springframework.security.authentication.*;
@@ -25,16 +27,22 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http,
+            JwtAuthenticationFilter jwtFilter,
+            JwtAuthenticationEntryPoint entryPoint,
+            JwtAccessDeniedHandler accessDeniedHandler) throws Exception {
         return http
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                .anyRequest().authenticated()
-            )
-            .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-            .build();
+                .csrf(csrf -> csrf.disable())
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(entryPoint) // 處理未登入錯誤
+                        .accessDeniedHandler(accessDeniedHandler) // 處理權限不足錯誤
+                )
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .anyRequest().authenticated())
+                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .build();
     }
 
     @Bean
