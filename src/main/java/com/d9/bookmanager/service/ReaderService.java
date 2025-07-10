@@ -5,7 +5,6 @@ import com.d9.bookmanager.entity.Reader;
 import com.d9.bookmanager.model.Role;
 import com.d9.bookmanager.repository.ReaderRepository;
 
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,12 +15,10 @@ import java.util.Set;
 public class ReaderService {
 
     private final ReaderRepository readerRepository;
-    private final PasswordEncoder passwordEncoder;
 
 
-    public ReaderService(ReaderRepository readerRepository, PasswordEncoder passwordEncoder) {
+    public ReaderService(ReaderRepository readerRepository) {
         this.readerRepository = readerRepository;
-        this.passwordEncoder = passwordEncoder;
     }
 
     public List<Reader> getAllReaders() {
