@@ -1,6 +1,6 @@
 package com.d9.bookmanager.security;
 
-import com.d9.bookmanager.dto.ApiResponse;
+import com.d9.bookmanager.dto.ApiResponseDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -21,7 +21,7 @@ public class JwtAccessDeniedHandler implements AccessDeniedHandler {
             HttpServletResponse response,
             AccessDeniedException accessDeniedException) throws IOException {
 
-        ApiResponse<Object> error = ApiResponse.error(403, "無權限存取該資源");
+        ApiResponseDto<Object> error = ApiResponseDto.error(403, "無權限存取該資源");
 
         response.setContentType("application/json");
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);

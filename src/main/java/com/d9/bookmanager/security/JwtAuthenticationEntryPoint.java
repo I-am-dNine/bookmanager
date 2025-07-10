@@ -1,6 +1,6 @@
 package com.d9.bookmanager.security;
 
-import com.d9.bookmanager.dto.ApiResponse;
+import com.d9.bookmanager.dto.ApiResponseDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -21,7 +21,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
             HttpServletResponse response,
             AuthenticationException authException) throws IOException {
 
-        ApiResponse<Object> error = ApiResponse.error(401, "未經授權，請先登入");
+        ApiResponseDto<Object> error = ApiResponseDto.error(401, "未經授權，請先登入");
 
         response.setContentType("application/json");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

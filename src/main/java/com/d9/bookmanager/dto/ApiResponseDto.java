@@ -1,15 +1,15 @@
 package com.d9.bookmanager.dto;
 
-public class ApiResponse<T> {
+public class ApiResponseDto<T> {
     private boolean success;
     private int code;
     private String message;
     private T data;
 
     // Constructors
-    public ApiResponse() {}
+    public ApiResponseDto() {}
 
-    public ApiResponse(boolean success, int code, String message, T data) {
+    public ApiResponseDto(boolean success, int code, String message, T data) {
         this.success = success;
         this.code = code;
         this.message = message;
@@ -17,16 +17,16 @@ public class ApiResponse<T> {
     }
 
     // Static methods
-    public static <T> ApiResponse<T> success(String message, T data) {
-        return new ApiResponse<>(true, 200, message, data);
+    public static <T> ApiResponseDto<T> success(String message, T data) {
+        return new ApiResponseDto<>(true, 200, message, data);
     }
 
-    public static <T> ApiResponse<T> error(int code, String message) {
-        return new ApiResponse<>(false, code, message, null);
+    public static <T> ApiResponseDto<T> error(int code, String message) {
+        return new ApiResponseDto<>(false, code, message, null);
     }
 
-    public static <T> ApiResponse<T> error(int code, String message, T data) {
-        return new ApiResponse<>(false, code, message, data);
+    public static <T> ApiResponseDto<T> error(int code, String message, T data) {
+        return new ApiResponseDto<>(false, code, message, data);
     }
 
     // Getters & Setters
