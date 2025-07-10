@@ -9,6 +9,7 @@ import com.d9.bookmanager.security.JwtTokenUtil;
 import com.d9.bookmanager.service.ReaderService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
+@Tag(name = "Auth", description = "使用者相關操作")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
