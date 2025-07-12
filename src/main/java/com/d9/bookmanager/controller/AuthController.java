@@ -1,57 +1,70 @@
 package com.d9.bookmanager.controller;
 
 import com.d9.bookmanager.dto.ApiResponseDto;
+import com.d9.bookmanager.dto.JwtResponse;
+import com.d9.bookmanager.dto.LoginRequest;
 import com.d9.bookmanager.dto.RegisterRequest;
 import com.d9.bookmanager.entity.Reader;
 import com.d9.bookmanager.model.Role;
 import com.d9.bookmanager.repository.ReaderRepository;
-
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import com.d9.bookmanager.security.JwtTokenUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 @RestController
 @RequestMapping("/auth")
-@Tag(name = "Authentication", description = "登入與註冊")
+@Tag(name = "Authentication", description = "登入 / 註冊 / Token 發行")
 public class AuthController {
 
+    private final AuthenticationManager authenticationManager;
+    private final JwtTokenUtil jwtTokenUtil;
     private final ReaderRepository readerRepository;
 
-    public AuthController(
-            ReaderRepository readerRepository) {
+    public AuthController(AuthenticationManager authenticationManager,
+                          JwtTokenUtil jwtTokenUtil,
+                          ReaderRepository readerRepository) {
+        this.authenticationManager = authenticationManager;
+        this.jwtTokenUtil = jwtTokenUtil;
         this.readerRepository = readerRepository;
     }
 
-    @Operation(
-        summary = "使用者註冊",
-        description = "註冊新使用者帳號，email 為登入用帳號",
-        responses = {
-            @ApiResponse(responseCode = "200", description = "註冊成功"),
-            @ApiResponse(responseCode = "400", description = "帳號已存在或格式錯誤")
-        }
-    )
+    @PostMapping("/login")
+    @Operation(summary = "使用者登入", description = "輸入 email 和 password，成功後會回傳 JWT token")
+    public ResponseEntity<ApiResponseDto<JwtResponse>> login(@Valid @RequestBody LoginRequest loginRequest) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        loginRequest.getEmail(),
+                        loginRequest.getPassword()
+                )
+        );
+
+        String token = jwtTokenUtil.generateToken(authentication);
+        return ResponseEntity.ok(ApiResponseDto.success("登入成功", new JwtResponse(token)));
+    }
+
     @PostMapping("/register")
+    @Operation(summary = "使用者註冊", description = "建立新帳號，預設角色為 USER")
     public ResponseEntity<ApiResponseDto<String>> register(@Valid @RequestBody RegisterRequest request) {
         if (readerRepository.findByEmail(request.getEmail()).isPresent()) {
-            return ResponseEntity.badRequest()
-                .body(ApiResponseDto.error(400, "該 email 已被註冊"));
+            return ResponseEntity.badRequest().body(ApiResponseDto.error(400, "帳號已存在"));
         }
 
-        Reader reader = Reader.builder()
-            .email(request.getEmail())
-            .name(request.getName())
-            // .password(passwordEncoder.encode(request.getPassword()))
-            .roles(Set.of(Role.USER))
-            .build();
+        Reader newReader = Reader.builder()
+                .email(request.getEmail())
+                .name(request.getName())
+                // .password(passwordEncoder.encode(request.getPassword()))
+                .roles(Set.of(Role.USER))
+                .build();
 
-        readerRepository.save(reader);
-
+        readerRepository.save(newReader);
         return ResponseEntity.ok(ApiResponseDto.success("註冊成功", null));
     }
 }
