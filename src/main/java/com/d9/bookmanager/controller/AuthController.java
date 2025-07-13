@@ -9,12 +9,15 @@ import com.d9.bookmanager.model.Role;
 import com.d9.bookmanager.repository.ReaderRepository;
 import com.d9.bookmanager.security.JwtTokenUtil;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
@@ -66,5 +69,14 @@ public class AuthController {
 
         readerRepository.save(newReader);
         return ResponseEntity.ok(ApiResponseDto.success("註冊成功", null));
+    }
+
+    @GetMapping("/me")
+    @Operation(summary = "取得目前登入者資訊")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<ApiResponseDto<Reader>> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
+        return readerRepository.findByEmail(userDetails.getUsername())
+                .map(reader -> ResponseEntity.ok(ApiResponseDto.success("取得成功", reader)))
+                .orElse(ResponseEntity.badRequest().body(ApiResponseDto.error(404, "找不到使用者")));
     }
 }
