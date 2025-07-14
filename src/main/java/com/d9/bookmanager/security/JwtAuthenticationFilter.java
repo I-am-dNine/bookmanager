@@ -1,6 +1,8 @@
 package com.d9.bookmanager.security;
 
 import com.d9.bookmanager.service.CustomUserDetailsService;
+import com.d9.bookmanager.service.JwtBlacklistService;
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.*;
@@ -17,10 +19,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenUtil jwtTokenUtil;
     private final CustomUserDetailsService userDetailsService;
+    private final JwtBlacklistService jwtBlacklistService;
 
-    public JwtAuthenticationFilter(JwtTokenUtil jwtTokenUtil, CustomUserDetailsService userDetailsService) {
+    public JwtAuthenticationFilter(JwtTokenUtil jwtTokenUtil, CustomUserDetailsService userDetailsService, JwtBlacklistService jwtBlacklistService) {
         this.jwtTokenUtil = jwtTokenUtil;
         this.userDetailsService = userDetailsService;
+        this.jwtBlacklistService = jwtBlacklistService;
     }
 
     @Override
@@ -39,6 +43,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                 if (jwtTokenUtil.validateToken(token)) {
+                    if (jwtBlacklistService.isBlacklisted(token)) {
+                        // Token 已登出，拒绝认证
+                        filterChain.doFilter(request, response);
+                        return;
+                    }
+
                     UsernamePasswordAuthenticationToken auth =
                             new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 

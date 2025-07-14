@@ -8,10 +8,15 @@ import com.d9.bookmanager.entity.Reader;
 import com.d9.bookmanager.model.Role;
 import com.d9.bookmanager.repository.ReaderRepository;
 import com.d9.bookmanager.security.JwtTokenUtil;
+import com.d9.bookmanager.service.JwtBlacklistService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -30,13 +35,16 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenUtil jwtTokenUtil;
     private final ReaderRepository readerRepository;
+    private final JwtBlacklistService jwtBlacklistService;
 
     public AuthController(AuthenticationManager authenticationManager,
                           JwtTokenUtil jwtTokenUtil,
-                          ReaderRepository readerRepository) {
+                          ReaderRepository readerRepository,
+                          JwtBlacklistService jwtBlacklistService) {
         this.authenticationManager = authenticationManager;
         this.jwtTokenUtil = jwtTokenUtil;
         this.readerRepository = readerRepository;
+        this.jwtBlacklistService = jwtBlacklistService;
     }
 
     @PostMapping("/login")
@@ -78,5 +86,17 @@ public class AuthController {
         return readerRepository.findByEmail(userDetails.getUsername())
                 .map(reader -> ResponseEntity.ok(ApiResponseDto.success("取得成功", reader)))
                 .orElse(ResponseEntity.badRequest().body(ApiResponseDto.error(404, "找不到使用者")));
+    }
+
+    @PostMapping("/logout")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<ApiResponseDto<String>> logout(HttpServletRequest request) {
+        String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            long remainingSeconds = jwtTokenUtil.getRemainingExpiration(token);
+            jwtBlacklistService.blacklistToken(token, remainingSeconds);
+        }
+        return ResponseEntity.ok(ApiResponseDto.success("登出成功", "Token 已加入黑名单"));
     }
 }

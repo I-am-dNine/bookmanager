@@ -44,4 +44,14 @@ public class JwtTokenUtil {
             return false;
         }
     }
+
+    public long getRemainingExpiration(String token) {
+        Claims claims = Jwts.parserBuilder()
+            .setSigningKey(jwtSecret)
+            .build()
+            .parseClaimsJws(token)
+            .getBody();
+    
+        return (claims.getExpiration().getTime() - System.currentTimeMillis()) / 1000;
+    }
 }
