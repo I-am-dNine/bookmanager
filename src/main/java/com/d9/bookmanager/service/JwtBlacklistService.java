@@ -1,6 +1,6 @@
 package com.d9.bookmanager.service;
 
-import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
@@ -8,17 +8,18 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class JwtBlacklistService {
 
-    private final StringRedisTemplate redisTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
+    private static final String PREFIX = "blacklisted:";
 
-    public JwtBlacklistService(StringRedisTemplate redisTemplate) {
+    public JwtBlacklistService(RedisTemplate<String, String> redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 
-    public void blacklistToken(String token, long expirationSeconds) {
-        redisTemplate.opsForValue().set(token, "blacklisted", expirationSeconds, TimeUnit.SECONDS);
+    public void blacklistToken(String token, long ttlSeconds) {
+        redisTemplate.opsForValue().set(PREFIX + token, "true", ttlSeconds, TimeUnit.SECONDS);
     }
 
     public boolean isBlacklisted(String token) {
-        return redisTemplate.hasKey(token);
+        return Boolean.TRUE.toString().equals(redisTemplate.opsForValue().get(PREFIX + token));
     }
 }

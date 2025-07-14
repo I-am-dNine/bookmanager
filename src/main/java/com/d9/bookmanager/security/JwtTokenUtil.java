@@ -54,4 +54,13 @@ public class JwtTokenUtil {
     
         return (claims.getExpiration().getTime() - System.currentTimeMillis()) / 1000;
     }
+
+    public long getExpiration(String token) {
+        Claims claims = Jwts.parser()
+            .setSigningKey(jwtSecret)
+            .parseClaimsJws(token)
+            .getBody();
+        return claims.getExpiration().getTime(); // 回传毫秒时间戳
+    }
+    
 }

@@ -13,10 +13,8 @@ import com.d9.bookmanager.service.JwtBlacklistService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -89,14 +87,18 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<ApiResponseDto<String>> logout(HttpServletRequest request) {
-        String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+    @Operation(summary = "登出", description = "將 JWT 加入黑名單")
+    public ResponseEntity<ApiResponseDto<Void>> logout(@RequestHeader("Authorization") String authHeader) {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
-            long remainingSeconds = jwtTokenUtil.getRemainingExpiration(token);
-            jwtBlacklistService.blacklistToken(token, remainingSeconds);
+            long expiration = jwtTokenUtil.getExpiration(token);
+            long now = System.currentTimeMillis();
+            long ttl = (expiration - now) / 1000; // 秒
+            if (ttl > 0) {
+                jwtBlacklistService.blacklistToken(token, ttl);
+            }
         }
-        return ResponseEntity.ok(ApiResponseDto.success("登出成功", "Token 已加入黑名单"));
+        return ResponseEntity.ok(ApiResponseDto.success("登出成功", null));
     }
+    
 }
