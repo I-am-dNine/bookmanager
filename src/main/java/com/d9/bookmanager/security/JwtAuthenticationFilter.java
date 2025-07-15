@@ -34,35 +34,37 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
+
         try {
             String authHeader = request.getHeader("Authorization");
 
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 String token = authHeader.substring(7); // 去除 "Bearer "
+
+                // 黑名单验证放在最前面
+                if (jwtBlacklistService.isBlacklisted(token)) {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json; charset=UTF-8");
+                    response.getWriter().write(objectMapper.writeValueAsString(
+                            ApiResponseDto.error(401, "Token 已被註銷，請重新登入")));
+                    return;
+                }
+
                 String username = jwtTokenUtil.getUsernameFromToken(token);
 
                 if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
                     if (jwtTokenUtil.validateToken(token)) {
-                        if (jwtBlacklistService.isBlacklisted(token)) {
-                            // Token 已登出，返回 401 錯誤訊息
-                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                            response.setContentType("application/json; charset=UTF-8");
-                            response.getWriter().write(objectMapper.writeValueAsString(
-                                    ApiResponseDto.error(401, "Token 已被註銷，請重新登入")));
-                            return;
-                        }
+                        UsernamePasswordAuthenticationToken authToken =
+                                new UsernamePasswordAuthenticationToken(
+                                        userDetails, null, userDetails.getAuthorities());
 
-                        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails,
-                                null, userDetails.getAuthorities());
-
-                        auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                        SecurityContextHolder.getContext().setAuthentication(auth);
+                        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        SecurityContextHolder.getContext().setAuthentication(authToken);
                     }
                 }
             }
@@ -70,11 +72,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
 
         } catch (JwtException e) {
-            // Token 無效或過期
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json; charset=UTF-8");
             response.getWriter().write(objectMapper.writeValueAsString(
-                ApiResponseDto.error(401, "無效或過期的 JWT Token")));
+                    ApiResponseDto.error(401, "無效或過期的 JWT Token")));
         }
     }
 
