@@ -10,15 +10,18 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Service
 public class ReaderService {
 
     private final ReaderRepository readerRepository;
+    private final PasswordEncoder passwordEncoder;
 
 
-    public ReaderService(ReaderRepository readerRepository) {
+    public ReaderService(ReaderRepository readerRepository, PasswordEncoder passwordEncoder) {
         this.readerRepository = readerRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<Reader> getAllReaders() {
@@ -52,7 +55,7 @@ public class ReaderService {
         Reader reader = Reader.builder()
             .name(request.getName())
             .email(request.getEmail())
-            // .password(passwordEncoder.encode(request.getPassword()))
+            .password(passwordEncoder.encode(request.getPassword()))
             .roles(Set.of(Role.USER)) // 預設角色
             .build();
     

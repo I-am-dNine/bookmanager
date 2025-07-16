@@ -2,13 +2,13 @@ package com.d9.bookmanager.controller;
 
 import com.d9.bookmanager.dto.ApiResponseDto;
 import com.d9.bookmanager.dto.JwtResponse;
-import com.d9.bookmanager.dto.LoginRequest;
 import com.d9.bookmanager.dto.RegisterRequest;
+import com.d9.bookmanager.dto.UserLoginRequest;
 import com.d9.bookmanager.entity.Reader;
-import com.d9.bookmanager.model.Role;
 import com.d9.bookmanager.repository.ReaderRepository;
 import com.d9.bookmanager.security.JwtTokenUtil;
 import com.d9.bookmanager.service.JwtBlacklistService;
+import com.d9.bookmanager.service.ReaderService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -23,8 +23,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Set;
-
 @RestController
 @RequestMapping("/auth")
 @Tag(name = "Authentication", description = "登入 / 註冊 / Token 發行")
@@ -34,23 +32,26 @@ public class AuthController {
     private final JwtTokenUtil jwtTokenUtil;
     private final ReaderRepository readerRepository;
     private final JwtBlacklistService jwtBlacklistService;
+    private final ReaderService readerService;
 
     public AuthController(AuthenticationManager authenticationManager,
                           JwtTokenUtil jwtTokenUtil,
                           ReaderRepository readerRepository,
-                          JwtBlacklistService jwtBlacklistService) {
+                          JwtBlacklistService jwtBlacklistService,
+                          ReaderService readerService) {
         this.authenticationManager = authenticationManager;
         this.jwtTokenUtil = jwtTokenUtil;
         this.readerRepository = readerRepository;
         this.jwtBlacklistService = jwtBlacklistService;
+        this.readerService = readerService;
     }
 
     @PostMapping("/login")
     @Operation(summary = "使用者登入", description = "輸入 email 和 password，成功後會回傳 JWT token")
-    public ResponseEntity<ApiResponseDto<JwtResponse>> login(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<ApiResponseDto<JwtResponse>> login(@Valid @RequestBody UserLoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        loginRequest.getEmail(),
+                        loginRequest.getUsername(),
                         loginRequest.getPassword()
                 )
         );
@@ -65,15 +66,7 @@ public class AuthController {
         if (readerRepository.findByEmail(request.getEmail()).isPresent()) {
             return ResponseEntity.badRequest().body(ApiResponseDto.error(400, "帳號已存在"));
         }
-
-        Reader newReader = Reader.builder()
-                .email(request.getEmail())
-                .name(request.getName())
-                // .password(passwordEncoder.encode(request.getPassword()))
-                .roles(Set.of(Role.USER))
-                .build();
-
-        readerRepository.save(newReader);
+        readerService.registerNewReader(request);
         return ResponseEntity.ok(ApiResponseDto.success("註冊成功", null));
     }
 

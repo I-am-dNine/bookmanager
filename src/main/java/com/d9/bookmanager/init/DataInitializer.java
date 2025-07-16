@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -21,13 +22,16 @@ public class DataInitializer implements CommandLineRunner {
         private final BookRepository bookRepository;
         private final ReaderRepository readerRepository;
         private final BorrowRecordRepository borrowRecordRepository;
+        private final PasswordEncoder passwordEncoder;
 
         public DataInitializer(BookRepository bookRepository,
                                 ReaderRepository readerRepository,
-                                BorrowRecordRepository borrowRecordRepository) {
+                                BorrowRecordRepository borrowRecordRepository,
+                                PasswordEncoder passwordEncoder) {
                 this.bookRepository = bookRepository;
                 this.readerRepository = readerRepository;
                 this.borrowRecordRepository = borrowRecordRepository;
+                this.passwordEncoder = passwordEncoder;
         }
 
     @Override
@@ -77,18 +81,21 @@ public class DataInitializer implements CommandLineRunner {
                 readerRepository.save(Reader.builder()
                                 .name("Alice Lin")
                                 .email("alice@example.com")
+                                .password(passwordEncoder.encode("123456"))
                                 .roles(Set.of(Role.ADMIN))
                                 .build());
 
                 readerRepository.save(Reader.builder()
                                 .name("Bob Chen")
                                 .email("bob@example.com")
+                                .password(passwordEncoder.encode("123456"))
                                 .roles(Set.of(Role.STAFF))
                                 .build());
 
                 readerRepository.save(Reader.builder()
                                 .name("Cathy Wu")
                                 .email("cathy@example.com")
+                                .password(passwordEncoder.encode("123456"))
                                 .roles(Set.of(Role.USER))
                                 .build());
 
