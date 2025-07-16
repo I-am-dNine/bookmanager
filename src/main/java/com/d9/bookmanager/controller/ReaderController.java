@@ -26,6 +26,7 @@ public class ReaderController {
 
     @GetMapping
     @Operation(summary = "查詢所有借閱者", description = "取得所有使用者（借閱人）清單")
+    @PreAuthorize("hasAnyRole('ADMIN','STAFF')")
     public ApiResponseDto<List<Reader>> getAllReaders() {
         List<Reader> readers = readerService.getAllReaders();
         return ApiResponseDto.success("查詢成功，共 " + readers.size() + " 位借閱者", readers);
@@ -33,31 +34,32 @@ public class ReaderController {
 
     @GetMapping("/{id}")
     @Operation(summary = "查詢單一借閱者", description = "透過借閱者 ID 查詢詳細資料")
+    @PreAuthorize("hasAnyRole('ADMIN','STAFF') or #id.toString() == authentication.name")
     public ResponseEntity<ApiResponseDto<Reader>> getReaderById(@PathVariable Long id) {
         return readerService.getReaderById(id)
                 .map(reader -> ResponseEntity.ok(ApiResponseDto.success("查詢成功", reader)))
                 .orElse(ResponseEntity.status(404).body(ApiResponseDto.error(404, "找不到該借閱者")));
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','STAFF')")
     @PostMapping
     @Operation(summary = "新增借閱者", description = "新增一位新的使用者（姓名 + Email）")
+    @PreAuthorize("hasAnyRole('ADMIN','STAFF')")
     public ResponseEntity<ApiResponseDto<Reader>> createReader(@RequestBody @Valid Reader reader) {
         Reader created = readerService.createReader(reader);
         return ResponseEntity.ok(ApiResponseDto.success("借閱者新增成功", created));
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','STAFF')")
     @PutMapping("/{id}")
     @Operation(summary = "更新借閱者資訊", description = "根據 ID 更新借閱者資料")
+    @PreAuthorize("hasAnyRole('ADMIN','STAFF') or #id.toString() == authentication.name")
     public ResponseEntity<ApiResponseDto<Reader>> updateReader(@PathVariable Long id, @RequestBody @Valid Reader reader) {
         Reader updated = readerService.updateReader(id, reader);
         return ResponseEntity.ok(ApiResponseDto.success("借閱者資訊更新成功", updated));
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN')")
     @DeleteMapping("/{id}")
     @Operation(summary = "刪除借閱者", description = "根據 ID 刪除借閱者紀錄")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponseDto<Void>> deleteReader(@PathVariable Long id) {
         readerService.deleteReader(id);
         return ResponseEntity.ok(ApiResponseDto.success("借閱者已刪除", null));
