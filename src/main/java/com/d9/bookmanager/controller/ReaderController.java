@@ -34,9 +34,9 @@ public class ReaderController {
 
     @GetMapping("/{id}")
     @Operation(summary = "查詢單一借閱者", description = "透過借閱者 ID 查詢詳細資料")
-    @PreAuthorize("hasAnyRole('ADMIN','STAFF') or #id.toString() == authentication.name")
+    @PreAuthorize("hasAnyRole('ADMIN','STAFF') or hasRole('USER')")
     public ResponseEntity<ApiResponseDto<Reader>> getReaderById(@PathVariable Long id) {
-        return readerService.getReaderById(id)
+        return readerService.getReaderByIdWithCheck(id)
                 .map(reader -> ResponseEntity.ok(ApiResponseDto.success("查詢成功", reader)))
                 .orElse(ResponseEntity.status(404).body(ApiResponseDto.error(404, "找不到該借閱者")));
     }
@@ -51,9 +51,9 @@ public class ReaderController {
 
     @PutMapping("/{id}")
     @Operation(summary = "更新借閱者資訊", description = "根據 ID 更新借閱者資料")
-    @PreAuthorize("hasAnyRole('ADMIN','STAFF') or #id.toString() == authentication.name")
+    @PreAuthorize("hasAnyRole('ADMIN','STAFF') or hasRole('USER')")
     public ResponseEntity<ApiResponseDto<Reader>> updateReader(@PathVariable Long id, @RequestBody @Valid Reader reader) {
-        Reader updated = readerService.updateReader(id, reader);
+        Reader updated = readerService.updateReaderWithCheck(id, reader);
         return ResponseEntity.ok(ApiResponseDto.success("借閱者資訊更新成功", updated));
     }
 

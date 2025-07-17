@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.access.AccessDeniedException;
 
 @Service
 public class ReaderService {
@@ -30,6 +33,22 @@ public class ReaderService {
 
     public Optional<Reader> getReaderById(Long id) {
         return readerRepository.findById(id);
+    }
+
+    public Optional<Reader> getReaderByIdWithCheck(Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+        boolean isAdminOrStaff = authentication.getAuthorities().stream()
+            .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN") || auth.getAuthority().equals("ROLE_STAFF"));
+        Optional<Reader> readerOpt = readerRepository.findById(id);
+        if (readerOpt.isEmpty()) {
+            return Optional.empty();
+        }
+        Reader reader = readerOpt.get();
+        if (!isAdminOrStaff && !reader.getEmail().equals(currentUsername)) {
+            throw new AccessDeniedException("You can only access your own information");
+        }
+        return Optional.of(reader);
     }
 
     public Reader createReader(Reader reader) {
@@ -62,4 +81,19 @@ public class ReaderService {
         return readerRepository.save(reader);
     }
     
+    public Reader updateReaderWithCheck(Long id, Reader reader) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+        boolean isAdminOrStaff = authentication.getAuthorities().stream()
+            .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN") || auth.getAuthority().equals("ROLE_STAFF"));
+        Optional<Reader> existingOpt = readerRepository.findById(id);
+        if (existingOpt.isEmpty()) {
+            throw new RuntimeException("Reader not found");
+        }
+        Reader existing = existingOpt.get();
+        if (!isAdminOrStaff && !existing.getEmail().equals(currentUsername)) {
+            throw new AccessDeniedException("You can only update your own information");
+        }
+        return updateReader(id, reader);
+    }
 }
