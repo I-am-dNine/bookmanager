@@ -9,7 +9,7 @@ services:
       redis:
         condition: service_started
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/bookdb?useSSL=false&serverTimezone=Asia/Kuala_Lumpur
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/bookdb?useSSL=false&serverTimezone=Asia/Kuala_Lumpur&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: bookuser
       SPRING_DATASOURCE_PASSWORD: bookpass
       SPRING_REDIS_HOST: redis
